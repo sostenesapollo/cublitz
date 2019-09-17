@@ -1,0 +1,24 @@
+{
+  "name": "cublitz",
+  "version": "1.0.0",
+  "description": "",
+  "main": "coin.js",
+  "scripts": {
+    "test": "nodemon app.js "
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "src/*"
+    ],
+    "delay": "100"
+  }
+}
