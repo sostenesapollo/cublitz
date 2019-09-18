@@ -2,10 +2,10 @@ var Game_Type = 1;
 
 (async function main(){            
 
-  var socket = io()
+  var socket = io();
   
   // await Game_Draw_Main_Screen()      
-  await Start_Game(socket)  
+  await Start_Game(socket);
 
 }())                       
 
@@ -14,8 +14,7 @@ async function Game_Draw_Main_Screen() {
   Draw_Logo()
   Draw_Button("Start")
   await Verify_Button_Hover(canvas.width/3,canvas.width/3,canvas.width/3, canvas.height/6,"Start")  
-  var sala = await Draw_Game_Type_Screen() 
-  console.log(sala)
+  await Draw_Game_Type_Screen()   
 
 }
 
@@ -78,6 +77,14 @@ function Verify_Button_Hover(beginx,beginy,scalex,scaley, text) {
       clicked = false
     }
   })
+}
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
 }
 
 function Draw_Button (text) {
