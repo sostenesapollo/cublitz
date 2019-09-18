@@ -4,7 +4,7 @@ var Game_Type = 1;
 
   var socket = io();
   
-  // await Game_Draw_Main_Screen()      
+  await Game_Draw_Main_Screen()      
   await Start_Game(socket);
 
 }())                       

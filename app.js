@@ -12,7 +12,7 @@ app.get("/",(req,res)=>{
     res.sendFile(__dirname+"/index.html")
 })
 
-var players_distribuition_in_room = [{x:10,y:10},{x:20,y:20},{x:30,y:30},{x:40,y:40}]
+var players_distribuition_in_room = [{x:1,y:1,color:"red"},{x:500 -2 ,y:1,color:"green"},{x:1,y:500 -2,color:"orange"},{x:500 -2,y:500 -2,color:"pink"}]
 var rooms = {1:{}}
 var players = {}
 
@@ -20,8 +20,27 @@ io.on("connection", socket=>{
         
     Join_Room(socket)
     UnJoinRoom(socket)
+    Some_Player_Pressed_A_Key(socket)
 
 })
+
+function Some_Player_Pressed_A_Key(socket) {
+    socket.on("Some_Player_Pressed_A_Key",data=>{        
+        if(players[data.id]){            
+            console.log(data)
+            console.log("---")
+            rooms[players[data.id]["room"]][data.id]['x'] = data.player.x;
+            rooms[players[data.id]["room"]][data.id]['y'] = data.player.y;
+            rooms[players[data.id]["room"]][data.id]['xSpeed'] = data.player.xSpeed;
+            rooms[players[data.id]["room"]][data.id]['ySpeed'] = data.player.ySpeed;
+            let room_id = players[data.id]["room"]            
+            let GameData = {id:socket.id,room: rooms[players[socket.id]['room']]}
+            for(r in rooms[room_id]) {                
+                socket.broadcast.to(r).emit("Some_Player_Pressed_A_Key",GameData)
+            }   
+        }
+    })
+}
 
 function Join_Room(socket) {       
     socket.on("Join_Room",s=>{        
@@ -33,35 +52,37 @@ function Join_Room(socket) {
             rooms[Object.size(rooms)+1] = {}            
         }
                             
-        var next_sala = Object.size(rooms)        
+        var next_sala = Object.size(rooms)  
+        var qnt_sala = 0      
         for(r in rooms) {            
             if(Object.size(rooms[r]) < RoomPlayersLimit) {
+                qnt_sala = Object.size(rooms[r])
                 next_sala = r
                 break;
             }
         }            
-        rooms[next_sala][socket.id] = {room: next_sala}
-        players[socket.id] = {room: next_sala}            
+        rooms[next_sala][socket.id] = {
+            room: next_sala,
+            x: players_distribuition_in_room[qnt_sala].x,
+            y: players_distribuition_in_room[qnt_sala].y,
+            color: players_distribuition_in_room[qnt_sala].color
+        }
+        players[socket.id] = {
+            room: next_sala        
+        }
 
-        Generate_And_Send_To_Cliente_Game_Data(socket)
+        Generate_And_Send_To_Cliente_Game_Data(socket, qnt_sala)
     })      
 }
 
-function Generate_And_Send_To_Cliente_Game_Data(socket) {
+function Generate_And_Send_To_Cliente_Game_Data(socket, qnt_sala) {
 
-    let room_id = players[socket.id].room    
-    let GameData = {
-        x: 10,
-        y: 20,
-        room: rooms[players[socket.id]['room']],
-        id: socket.id
-    }
+    let room_id = players[socket.id].room        
+    let GameData = {id:socket.id,room: rooms[players[socket.id]['room']]}
     socket.emit("Joined_Room",GameData)
     for(r in rooms[room_id]) {
-        socket.broadcast.to(r).emit("Joined_Room",GameData)        
-    }    
-
-    
+        socket.broadcast.to(r).emit("Joined_Room",GameData)
+    }        
 }
 
 function UnJoinRoom(socket) {    

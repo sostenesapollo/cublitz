@@ -7,41 +7,76 @@ var gameBoardCenterDistance = 40;
 var players = []
 let player = new Player()  
 
-var playerStartPosition = [
-    {x:1,y:1},
-    {x:gameBoardCenterDistance - 2,y:1}
-]
+async function Start_Game(socket){    
 
-async function Start_Game(socket){
-    animateSquares()
-    await Join_Room(socket);
-    await Join_Room_Response(socket);    
-    console.log("begin")
-    // let id = await Receive_From_Server("connected",socket)    
+                    await Join_Room(socket);
+    let Game_Data = await Join_Room_Response(socket);    
 
-    // let camera = new Camera()      
-    // player.id = id   
+    // console.log(Game_Data)
+        
+
+    let camera = new Camera()          
+    let players = {}
     // let bullets = []
 
-    // let walls = returnWalls()        
-
-    // camera.draw(walls,"#545451")
-    // camera.draw(player,player.color)      
-    // camera.draw(coins,"#8c8c02e0")        
-
-    // window.setInterval(()=>{        
-                
-    //     ctx.clearRect(0,0,canvas.width,canvas.height)                     
-
+    let walls = returnWalls()        
+    
+        
+    for(p in Game_Data['room']) {        
+        let player = new Player                
+        player.x = Game_Data['room'][p]['x']
+        player.y = Game_Data['room'][p]['y']
+        player.c = Game_Data['room'][p]['color']        
+        if(p == socket.id) {
+            player.id = p                        
+        }        
+        players[p] = player        
+    }    
+    
+    camera.draw(walls,false,"#545451")    
+    camera.draw(players, true)      
+    // camera.draw(coins,"#8c8c02e0")
+    let ativado = false
+    window.setInterval(()=>{                        
+        ctx.clearRect(0,0,canvas.width,canvas.height)   
+        ctx.fillText(socket.id,10,20)                  
     //     camera.draw(coins,"#8c8c02e0")
-    //     camera.draw(player,player.color)    
-    //     camera.draw(walls,"#545451")        
-    //     // drawLines(cells)                             
+        camera.draw(players, true)
 
-    //     var isPoint = player.verifyIsEarningCoin(coins)
-    //     player.update()
-    //     camera.follow(player)
-    //     player.verifyColisions()                
+        // console.log(players[socket.id])
+
+        camera.draw(walls, false, "#545451")        
+        drawLines(cells)                             
+
+    //     var isPoint = player.verifyIsEarningCoin(coins)        
+        camera.follow(players[socket.id])
+        // console.log(players)
+        if(!ativado) {
+            socket.on("Some_Player_Pressed_A_Key",data=>{                
+                for(p in data['room']) {
+                    if(p!=socket.id) {                           
+                        
+                        let xSpeedFromServer = data['room'][data.id]['xSpeed']                        
+                        let ySpeedFromServer = data['room'][data.id]['ySpeed']         
+                        let xFromServer = data['room'][data.id]['x']         
+                        let yFromServer = data['room'][data.id]['y']         
+                        
+                        players[data.id].ySpeed = ySpeedFromServer
+                        players[data.id].xSpeed =  xSpeedFromServer
+                        players[data.id].x = xFromServer
+                        players[data.id].y = yFromServer
+                        
+                    }                    
+                    console.log('here')
+                }                                     
+            })                            
+            console.log("Ativado.")
+            ativado = true
+        }
+        
+        player.update(players)
+
+        player.verifyColisions(players)                
 
     //     // Update All bullets and set color
     //     camera.draw(bullets,"red")                
@@ -66,15 +101,14 @@ async function Start_Game(socket){
     //         return;
     //     }
 
-    // },70)
+    },70)
 
-    // window.addEventListener("keydown",e=>{          
-    //     player.onKeyDown(e.key)        
-    //     player.onKeyDownShot(e.key, bullets)
-
-    //     ios.emit('someonePressedAKey',player)
-    //     // console.log(player)
-    // })
+    window.addEventListener("keydown",e=>{                
+        players[socket.id].onKeyDown(e.key)                
+        // players[0].onKeyDownShot(e.key, bullets)
+        socket.emit('Some_Player_Pressed_A_Key',{id:socket.id, player: players[socket.id]})
+        // console.log(player)
+    })
 
 }
 
@@ -87,19 +121,15 @@ async function Join_Room_Response(socket) {
 
         ctx.fillStyle = "red"    
         showed = false
-        socket.on("Joined_Room",Game_Data=>{                        
+        socket.on("Joined_Room", async Game_Data=>{                        
             if(!showed) {
                 ctx.fillText(Game_Data.id,canvas.height/4,canvas.height/4+100)
                 showed = true
             }
                     
-            let qnt = drawRects(Object.size(Game_Data.room))
-            
-            console.log("A player joined to this room.")
-            console.log(Object.size(Game_Data.room)+" ° player.")
-            console.log(Game_Data)
-            if(qnt == 4) {
-                resolve(true)
+            await drawRects(Object.size(Game_Data.room))            
+            if(Game_Data.room) {
+                resolve(Game_Data)
             }            
         }) 
     })   
@@ -125,8 +155,8 @@ async function drawRects (qnt) {
             ctx.fillRect(canvas.width/4,canvas.width/1.25,50,50)
             ctx.fillRect(canvas.width/2,canvas.width/1.25,50,50)
             await animateSquares()
-            ctx.fillStyle = "beige"            
-            console.log("Animated")
+            ctx.fillStyle = "beige"                        
+            resolve(qnt)
         }
     })
 }
@@ -136,6 +166,6 @@ async function animateSquares (qnt) {
         window.setTimeout(()=>{
             ctx.clearRect(10,10,canvas.width,canvas.height)
             resolve(true)        
-        },1000)        
+        },500)        
     })
 }

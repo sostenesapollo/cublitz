@@ -8,29 +8,33 @@ function Camera () {
     this.x = -5;
     this.y = -5;
 
-    this.draw = (obj, c) =>{  
-        if( obj && obj.length >= 1) {
-            obj.forEach(i => {                   
+    this.draw = (obj, isObjects,c) =>{              
+        if( isObjects && obj && Object.size(obj) >= 1) {
+            for(i in obj) {          
                 ctx.fillStyle = "#92927d"
                 if(c) {                    
                     ctx.fillStyle = c
                 }
+                if(obj[i].c) {                    
+                    ctx.fillStyle = obj[i].c
+                }
                 ctx.fillRect(
-                    (i.x*(canvas.width/cells)) - this.x*(canvas.width/cells),
-                    i.y*(canvas.width/cells) - this.y*(canvas.width/cells),
+                    (obj[i].x*(canvas.width/cells)) - this.x*(canvas.width/cells),
+                    obj[i].y*(canvas.width/cells) - this.y*(canvas.width/cells),
                     (canvas.width/cells),
                     (canvas.width/cells))
-            });    
+            };    
+        }else{
+            ctx.fillStyle = "#92927d"
+            if(c) { ctx.fillStyle = c }            
+            obj.forEach(i=>{                
+                ctx.fillRect(
+                (i.x*(canvas.width/cells)) - this.x*(canvas.width/cells),
+                i.y*(canvas.width/cells) - this.y*(canvas.width/cells),
+                (canvas.width/cells),
+                (canvas.width/cells))
+            })                    
         }
-        ctx.fillStyle = "#92927d"
-        if(c) {                    
-            ctx.fillStyle = c
-        }
-        ctx.fillRect(
-            (obj.x*(canvas.width/cells)) - this.x*(canvas.width/cells),
-            obj.y*(canvas.width/cells) - this.y*(canvas.width/cells),
-            (canvas.width/cells),
-            (canvas.width/cells))
     }
 
     this.follow = (player) =>{

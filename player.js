@@ -12,6 +12,7 @@ function Player () {
     this.life = 3 
     
     this.color = "red"
+    this.c;
 
     this.id;
 
@@ -38,23 +39,27 @@ function Player () {
         })
     })    
 
-    this.update = () =>{
-        this.x += this.xSpeed;
-        this.y += this.ySpeed;
-    }
+    this.update = (obj, id) =>{
+        for(i in obj) {            
+            obj[i]['x'] += obj[i]['xSpeed']
+            obj[i]['y'] += obj[i]['ySpeed']                
+        }        
+    }    
 
-    this.verifyColisions = () =>{        
-        if(this.x > gameBoardCenterDistance - 1) {
-            this.x = this.x - 1
-        }
-        if(this.x < 0) {
-            this.x = 0
-        }
-        if(this.y < 0) {
-            this.y = 0
-        }
-        if(this.y > gameBoardCenterDistance - 1) {
-            this.y = gameBoardCenterDistance - 1
+    this.verifyColisions = (obj, id) =>{   
+        for(i in obj) {          
+            if(obj[i]['x']  > gameBoardCenterDistance - 1) {
+                obj[i]['x'] = obj[i]['x'] - 1
+            }
+            if(obj[i]['x'] < 0) {
+                obj[i]['x'] = 0
+            }
+            if(obj[i]['y'] < 0) {
+                obj[i]['y'] = 0
+            }
+            if(obj[i]['y'] > gameBoardCenterDistance - 1) {
+                obj[i]['y'] = gameBoardCenterDistance - 1
+            }
         }
     }
 
