@@ -12,7 +12,7 @@ async function Start_Game(socket){
                     await Join_Room(socket);
     let Game_Data = await Join_Room_Response(socket);    
 
-    // console.log(Game_Data)
+    // console.log(Gabriel)
         
 
     let camera = new Camera()          
